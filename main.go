@@ -46,7 +46,13 @@ func randomKey(size int) string {
 }
 
 func randBytes() ([]byte, error) {
-	b := make([]byte, 64) // always generate 64 bytes
+	byt := 64
+
+	if keyLen > 64 {
+		byt = keyLen
+	}
+
+	b := make([]byte, byt) // always generate 64 bytes
 	_, err := rand.Read(b)
 	if err != nil {
 		return nil, err
