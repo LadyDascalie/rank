@@ -2,15 +2,21 @@ package main
 
 import (
 	"crypto/rand"
+	mr "math/rand"
 	"encoding/base64"
 	"encoding/hex"
 	"flag"
 	"fmt"
+	"time"
 )
 
 var keyLen int
 var passNum int
 var method string
+
+const CHARSET = "abcdefghijklmnopqrstuvwxyz" +
+	"ABCDEFGHIJKLMNOPQRSTUVWXYZ" +
+	"0123456789"
 
 func main() {
 	flag.IntVar(&keyLen, "l", 32, "randkey -l 32")
@@ -37,6 +43,8 @@ func randomKey(size int) string {
 		str = hex.EncodeToString(b)
 	case "base64":
 		str = base64.URLEncoding.EncodeToString(b)
+	case "string":
+		str = randString(size)
 	default:
 		str = base64.URLEncoding.EncodeToString(b)
 	}
@@ -59,4 +67,16 @@ func randBytes() ([]byte, error) {
 	}
 
 	return b, nil
+}
+
+func randString(n int) string {
+	mr.Seed(time.Now().UnixNano())
+
+	b := make([]byte, n)
+
+	for i := range b {
+		b[i] = CHARSET[mr.Intn(len(CHARSET))]
+	}
+
+	return string(b)
 }
