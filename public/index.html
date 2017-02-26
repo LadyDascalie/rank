@@ -1,0 +1,63 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport"
+          content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>Generator</title>
+
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css">
+    <link rel="stylesheet" href="assets/main.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.1.1/jquery.min.js"></script>
+</head>
+<header>
+
+</header>
+<body class="container">
+<div class="row">
+    <div class="col-xs-8 col-xs-offset-2">
+        <img class="cop center-block img img-responsive"
+             src="http://www.todayifoundout.com/wp-content/uploads/2013/09/cop-donut.jpg" alt="">
+        <h1>Dorset Police Password Generator<br><small>Get a fresh new password</small></h1>
+        <br>
+        <br>
+        <button class="btn btn-success center-block generator" onclick="generate();">Generate</button>
+        <span class="len"></span>
+        <input type="text" class="generated form-control" onclick="this.select()">
+        <!--<button class="btn btn-success center generator" onclick="largeType();">Large type</button>-->
+        <div class="large-type"></div>
+    </div>
+</div>
+<script>
+    function generate() {
+        $.getJSON("/gen/5/words", function (d) {
+            $(".generated").val(d.password);
+            $(".len").html("This password is <b>" + d.password.length + "</b> characters long");
+            largeType();
+        });
+    }
+
+    function largeType() {
+        var lt = $(".large-type");
+        var pass = $(".generated").val();
+        if (pass.length === 0) {
+            return false;
+        }
+
+        lt.html(""); // make sure we don't append
+
+        var p = pass.split("");
+        for (var i = 0; i < p.length; i++) {
+            if ((i % 2) === 0) {
+                lt.append("<span class='even'>"+p[i]+"<footnote>"+(i+1)+"</footnote></span>");
+            } else {
+                lt.append("<span class='odd'>"+p[i]+"<footnote>"+(i+1)+"</footnote></span>");
+            }
+        }
+    }
+
+    generate();
+</script>
+</body>
+</html>
