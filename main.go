@@ -5,6 +5,8 @@ import (
 	"crypto/rand"
 	"encoding/base64"
 	"encoding/hex"
+	"flag"
+	"fmt"
 	mr "math/rand"
 	"net/http"
 	"os"
@@ -30,6 +32,7 @@ const (
 )
 
 type (
+	// Dictionary contains the web2 Dictionary contents
 	Dictionary struct {
 		Total int
 		Words []string
@@ -37,7 +40,7 @@ type (
 )
 
 func init() {
-	file, err := os.Open("web2")
+	file, err := os.Open("/usr/share/dict/words")
 	if err != nil {
 		panic(err)
 	}
@@ -46,7 +49,7 @@ func init() {
 	scanner := bufio.NewScanner(file)
 	for scanner.Scan() {
 		dict.Total++
-		dict.Words = append(dict.Words, scanner.Text())
+		dict.Words = append(dict.Words, strings.ToLower(scanner.Text()))
 	}
 
 	if err := scanner.Err(); err != nil {
@@ -54,17 +57,23 @@ func init() {
 	}
 }
 
+var size int
+var number int
+var method string
+
 func main() {
-	e := echo.New()
+	flag.IntVar(&size, "size", 32, "rank -size 32")
+	flag.IntVar(&number, "n", 1, "rank -n 5")
+	flag.StringVar(&method, "method", "base64", "rank -method words|hex|base64|string")
+	flag.Parse()
 
-	e.GET("/gen", genHandler)
-	e.GET("/gen/:len", genHandler)
-	e.GET("/gen/:len/:method", genHandler)
-
-	e.Static("assets", "public/assets")
-	e.File("/", "public/index.html")
-
-	e.Logger.Fatal(e.Start(":8080"))
+	for n := 0; n < number; n++ {
+		if number == 1 {
+			fmt.Print(randomKey(size, method))
+			return
+		}
+		fmt.Println(randomKey(size, method))
+	}
 }
 
 // Generated is the struct to send back to the browser
@@ -129,7 +138,8 @@ func randWords(size int) (pass string) {
 	var sep = " "
 
 	for i := 0; i < size; i++ {
-		words = append(words, dict.Words[mr.Intn(dict.Total - 1)])
+		w := dict.Words[mr.Intn(dict.Total-1)]
+		words = append(words, w)
 	}
 
 	return strings.Join(words, sep)
